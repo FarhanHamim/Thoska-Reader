@@ -1,0 +1,12 @@
+THOSKA BOY (ThoskaPulse) transforms everyday university Mensa card balance inquiries into a tactile, nostalgic 1990s handheld gaming experience. Built with modern Kotlin and Jetpack Compose, it communicates directly with physical MIFARE DESFire EV1 (thoska) smartcards using raw ISO 7816-4 APDUs over ISO-DEP (NFC Type A).
+
+Features:
+• 100% Offline & Privacy First: Zero internet permissions (android.permission.INTERNET is completely absent), zero analytics, zero trackers. All student profile data stays strictly encrypted on local storage.
+• 1990s Handheld Console Aesthetic: Matte Thoska Burnt Orange casing, slate teal bezel, and vintage dot-matrix LCD screen with customizable palettes (DMG Olive, Pocket Silver, Backlit Cyan).
+• 10 Thuringian Higher Education Institutions: Custom pixelated 8-bit Canvas badges and dynamic library pass headers for EAH Jena, FSU Jena, TU Ilmenau, Bauhaus-Universität Weimar, Uni Erfurt, FH Erfurt, HS Schmalkalden, HS Nordhausen, HfM Franz Liszt Weimar, and DHGE.
+• Mensa Budget Simulator: Use the D-Pad to calculate how many coffees, washing machine cycles, or Mensa dishes your current card balance can afford.
+• Max-Brightness Barcode Scanner Auto-Boost: Automatically maxes out screen brightness with quiet-zone padding when flipping to your student library barcode.
+• Low Credit & Expiry Alerts: 3-beep low health chime when balance drops below 5.00 € and semester validation warning when your card is expiring.
+• Offline CSV Export: Export your transaction history securely via Android's Storage Access Framework without requiring storage permissions.
+• Home Screen Mini-Widget (3x1): Keep your latest balance and meal deduction visible right on your launcher.
+

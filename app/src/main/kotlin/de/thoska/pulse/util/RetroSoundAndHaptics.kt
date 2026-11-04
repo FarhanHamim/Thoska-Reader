@@ -51,6 +51,23 @@ object RetroSoundAndHaptics {
     }
 
     /**
+     * Rapid 3-beep low-health tone played when card balance is < 5.00 €.
+     */
+    fun playLowHealthTone(context: Context) {
+        triggerHaptic(context, durationMs = 80)
+        CoroutineScope(Dispatchers.Default).launch {
+            try {
+                repeat(3) {
+                    toneGenerator?.startTone(ToneGenerator.TONE_PROP_BEEP, 60)
+                    delay(110)
+                }
+            } catch (_: Exception) {
+                // Ignore audio failure
+            }
+        }
+    }
+
+    /**
      * Tactile button click haptic / short click sound.
      */
     fun playButtonClick(context: Context) {

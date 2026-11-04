@@ -1,6 +1,8 @@
 package de.thoska.pulse.ui.viewmodel
 
 import android.app.Application
+import android.content.Context
+import android.net.Uri
 import android.nfc.NfcAdapter
 import android.nfc.tech.IsoDep
 import androidx.lifecycle.AndroidViewModel
@@ -9,12 +11,19 @@ import de.thoska.pulse.data.CardProfileRepository
 import de.thoska.pulse.data.ScanHistoryRepository
 import de.thoska.pulse.model.ApduLogEntry
 import de.thoska.pulse.model.CardProfile
+import de.thoska.pulse.model.LcdPalette
+import de.thoska.pulse.model.MensaBudgetPreset
 import de.thoska.pulse.model.ScanRecord
 import de.thoska.pulse.model.ThoskaCardData
+import de.thoska.pulse.model.ThuringiaUniversity
 import de.thoska.pulse.reader.AndroidIsoDepTransceiver
 import de.thoska.pulse.reader.CardReadException
 import de.thoska.pulse.reader.DesfireReader
 import de.thoska.pulse.util.RetroSoundAndHaptics
+import de.thoska.pulse.util.ThoskaCsvHelper
+import de.thoska.pulse.util.ThoskaValidationHelper
+import de.thoska.pulse.widget.ThoskaAppWidget
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,6 +56,7 @@ class ThoskaViewModel(application: Application) : AndroidViewModel(application) 
 
     private val scanHistoryRepository = ScanHistoryRepository(application.applicationContext)
     val cardProfileRepository = CardProfileRepository(application.applicationContext)
+    private val prefs = application.getSharedPreferences("thoska_pulse_preferences", Context.MODE_PRIVATE)
 
     val history: StateFlow<List<ScanRecord>> = scanHistoryRepository.historyFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -63,6 +73,9 @@ class ThoskaViewModel(application: Application) : AndroidViewModel(application) 
     private val _showRegisterDialog = MutableStateFlow(false)
     val showRegisterDialog: StateFlow<Boolean> = _showRegisterDialog.asStateFlow()
 
+    private val _editingProfile = MutableStateFlow<CardProfile?>(null)
+    val editingProfile: StateFlow<CardProfile?> = _editingProfile.asStateFlow()
+
     private val _nfcStatus = MutableStateFlow(checkNfcStatus())
     val nfcStatus: StateFlow<NfcStatus> = _nfcStatus.asStateFlow()
 
@@ -71,6 +84,16 @@ class ThoskaViewModel(application: Application) : AndroidViewModel(application) 
 
     private val _showApduSheet = MutableStateFlow(false)
     val showApduSheet: StateFlow<Boolean> = _showApduSheet.asStateFlow()
+
+    // D-Pad Feature 1: Mensa Budget Preset (D-Pad UP / DOWN)
+    private val _budgetPreset = MutableStateFlow(MensaBudgetPreset.COFFEE)
+    val budgetPreset: StateFlow<MensaBudgetPreset> = _budgetPreset.asStateFlow()
+
+    // D-Pad Feature 2: LCD Palette Switcher (D-Pad LEFT / RIGHT)
+    private val _lcdPalette = MutableStateFlow(
+        LcdPalette.fromId(prefs.getString(KEY_LCD_PALETTE, LcdPalette.DMG_OLIVE.id))
+    )
+    val lcdPalette: StateFlow<LcdPalette> = _lcdPalette.asStateFlow()
 
     private var warningJob: Job? = null
 
@@ -109,6 +132,11 @@ class ThoskaViewModel(application: Application) : AndroidViewModel(application) 
                     // Trigger 8-bit coin chime & vibration
                     RetroSoundAndHaptics.playCoinChime(getApplication())
 
+                    // Low-balance alert audio check (< 5.00 €)
+                    if (ThoskaValidationHelper.isLowBalance(cardData.balanceEur)) {
+                        RetroSoundAndHaptics.playLowHealthTone(getApplication())
+                    }
+
                     // Store scan in persistent local history
                     scanHistoryRepository.addRecord(
                         ScanRecord(
@@ -118,6 +146,9 @@ class ThoskaViewModel(application: Application) : AndroidViewModel(application) 
                             lastTransactionEur = cardData.lastTransactionEur
                         )
                     )
+
+                    // Refresh widget with latest scan
+                    ThoskaAppWidget.updateAllWidgets(getApplication())
                 } else {
                     val exception = result.exceptionOrNull()
                     val logs = (exception as? CardReadException)?.logs ?: emptyList()
@@ -134,8 +165,7 @@ class ThoskaViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     /**
-     * Simulates scanning a card. Defaults to the pre-seeded personal student card
-     * UID "04:31:56:CA:6C:24:90" with 40,40 € balance and -1,40 € last meal cost.
+     * Simulates scanning a card. Defaults to student card UID with customizable balance.
      */
     fun simulateScan(
         mockUid: String = "04:31:56:CA:6C:24:90",
@@ -198,6 +228,11 @@ class ThoskaViewModel(application: Application) : AndroidViewModel(application) 
             // Trigger 8-bit coin chime & vibration
             RetroSoundAndHaptics.playCoinChime(getApplication())
 
+            // Low-balance alert audio check (< 5.00 €)
+            if (ThoskaValidationHelper.isLowBalance(cardData.balanceEur)) {
+                RetroSoundAndHaptics.playLowHealthTone(getApplication())
+            }
+
             scanHistoryRepository.addRecord(
                 ScanRecord(
                     timestamp = cardData.timestamp,
@@ -206,6 +241,9 @@ class ThoskaViewModel(application: Application) : AndroidViewModel(application) 
                     lastTransactionEur = cardData.lastTransactionEur
                 )
             )
+
+            // Refresh widget with simulated scan
+            ThoskaAppWidget.updateAllWidgets(getApplication())
         }
     }
 
@@ -220,6 +258,7 @@ class ThoskaViewModel(application: Application) : AndroidViewModel(application) 
         _screenMode.value = ConsoleScreenMode.BALANCE_FRONT
         _warningMessage.value = null
         _showRegisterDialog.value = false
+        _editingProfile.value = null
     }
 
     /**
@@ -232,7 +271,6 @@ class ThoskaViewModel(application: Application) : AndroidViewModel(application) 
         val currentState = _scanState.value
 
         if (currentState !is CardScanState.Success) {
-            // Requirement 2: Show bold warning on LCD
             showWarning("NO CARD LOCKED - TAP THOSKA FIRST")
             return
         }
@@ -267,13 +305,15 @@ class ThoskaViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    fun openRegisterDialog() {
+    fun openRegisterDialog(profile: CardProfile? = null) {
         RetroSoundAndHaptics.playButtonClick(getApplication())
+        _editingProfile.value = profile
         _showRegisterDialog.value = true
     }
 
     fun closeRegisterDialog() {
         _showRegisterDialog.value = false
+        _editingProfile.value = null
     }
 
     fun saveCardRegistration(
@@ -281,14 +321,16 @@ class ThoskaViewModel(application: Application) : AndroidViewModel(application) 
         name: String,
         matrikel: String,
         barcode: String,
-        valid: String
+        valid: String,
+        universityId: String = ThuringiaUniversity.EAH_JENA.id
     ) {
         val newProfile = CardProfile(
             cardUid = cardUid,
             holderName = name.ifBlank { "STUDENT" },
             matrikelNr = matrikel.ifBlank { "0000000" },
             libraryBarcode = barcode.ifBlank { "000000000000" },
-            validUntil = valid.ifBlank { "01.10.26 - 31.03.27" }
+            validUntil = valid.ifBlank { "01.10.26 - 31.03.27" },
+            universityId = universityId
         )
         cardProfileRepository.saveProfile(newProfile)
 
@@ -299,11 +341,52 @@ class ThoskaViewModel(application: Application) : AndroidViewModel(application) 
         }
 
         _showRegisterDialog.value = false
+        _editingProfile.value = null
         RetroSoundAndHaptics.playCoinChime(getApplication())
     }
 
-    fun onDirectionalPadPress(@Suppress("UNUSED_PARAMETER") direction: String) {
+    /**
+     * Interactive D-Pad Controller:
+     * - UP/DOWN: Mensa Budget Preset cycling (COFFEE -> WASHING -> CLASSIC -> PREMIUM)
+     * - LEFT/RIGHT: LCD Palette Switcher (DMG OLIVE <-> POCKET SILVER <-> BACKLIT CYAN)
+     */
+    fun onDirectionalPadPress(direction: String) {
         RetroSoundAndHaptics.playButtonClick(getApplication())
+        when (direction.uppercase()) {
+            "UP" -> {
+                _budgetPreset.value = MensaBudgetPreset.prev(_budgetPreset.value)
+            }
+            "DOWN" -> {
+                _budgetPreset.value = MensaBudgetPreset.next(_budgetPreset.value)
+            }
+            "LEFT" -> {
+                val newPalette = LcdPalette.prev(_lcdPalette.value)
+                _lcdPalette.value = newPalette
+                prefs.edit().putString(KEY_LCD_PALETTE, newPalette.id).apply()
+            }
+            "RIGHT" -> {
+                val newPalette = LcdPalette.next(_lcdPalette.value)
+                _lcdPalette.value = newPalette
+                prefs.edit().putString(KEY_LCD_PALETTE, newPalette.id).apply()
+            }
+        }
+    }
+
+    /**
+     * Offline CSV Export via Storage Access Framework
+     */
+    fun exportHistoryToUri(context: Context, uri: Uri) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val csvContent = ThoskaCsvHelper.formatHistoryAsCsv(history.value)
+                context.contentResolver.openOutputStream(uri)?.use { os ->
+                    os.write(csvContent.toByteArray(Charsets.UTF_8))
+                }
+                RetroSoundAndHaptics.playCoinChime(getApplication())
+            } catch (_: Exception) {
+                // Ignore file write exceptions
+            }
+        }
     }
 
     fun dismissApduSheet() {
@@ -322,5 +405,10 @@ class ThoskaViewModel(application: Application) : AndroidViewModel(application) 
     fun clearHistory() {
         scanHistoryRepository.clearHistory()
         RetroSoundAndHaptics.playButtonClick(getApplication())
+        ThoskaAppWidget.updateAllWidgets(getApplication())
+    }
+
+    companion object {
+        private const val KEY_LCD_PALETTE = "key_lcd_palette"
     }
 }

@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import de.thoska.pulse.model.ThoskaCardData
 import de.thoska.pulse.ui.theme.BezelTeal
+import de.thoska.pulse.ui.theme.CasingButtonLabel
 import de.thoska.pulse.ui.theme.CasingTextDebossed
 import de.thoska.pulse.ui.theme.CasingTextWhite
 import de.thoska.pulse.ui.theme.ShellOrangeDark
@@ -37,10 +38,15 @@ import de.thoska.pulse.ui.theme.ShellOrangeShadow
 
 /**
  * Top header of the Thoska Boy handheld casing:
- * Debossed retro "THOSKA BOY" title on top right + pixelated EAH Jena triangle logo.
+ * - When a registered card is locked: selected university 8-bit logo + university shortName.
+ * - When idle ("NO CARTRIDGE") or unregistered guest card: neutral 8-bit cartridge logo + "THOSKA SYSTEM".
+ * - Top-right: Debossed retro "THOSKA BOY™" title.
  */
 @Composable
-fun ShellHeader(modifier: Modifier = Modifier) {
+fun ShellHeader(
+    activeCard: ThoskaCardData? = null,
+    modifier: Modifier = Modifier
+) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -48,20 +54,41 @@ fun ShellHeader(modifier: Modifier = Modifier) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // EAH Jena Pixelated Triangle Logo
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            EahJenaPixelLogo(modifier = Modifier.size(24.dp))
-            Spacer(modifier = Modifier.width(6.dp))
-            Text(
-                text = "EAH JENA",
-                style = MaterialTheme.typography.titleSmall.copy(
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = 1.sp
-                ),
-                color = BezelTeal,
-                fontFamily = FontFamily.Monospace
-            )
+        val profile = activeCard?.profile
+        val university = profile?.university
+
+        if (university != null) {
+            // Dynamic University Logo & Short Name
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                UniversityLogo(university = university, modifier = Modifier.size(24.dp))
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = university.shortName,
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.sp
+                    ),
+                    color = Color(university.primaryColorHex),
+                    fontFamily = FontFamily.Monospace
+                )
+            }
+        } else {
+            // Neutral Retro 8-Bit Cartridge Logo + "THOSKA SYSTEM"
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                ThoskaSystemLogo(modifier = Modifier.size(24.dp))
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = "THOSKA SYSTEM",
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.sp
+                    ),
+                    color = CasingButtonLabel,
+                    fontFamily = FontFamily.Monospace
+                )
+            }
         }
 
         // Debossed "THOSKA BOY" in retro bold gaming font

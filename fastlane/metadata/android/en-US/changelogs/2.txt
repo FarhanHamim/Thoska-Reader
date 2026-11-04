@@ -1,0 +1,9 @@
+v1.1.0 Feature Expansion:
+- Neutral Idle/Guest Header: Renders retro 8-bit "THOSKA SYSTEM" cartridge badge when no card is locked.
+- 10 Thuringian Universities: Support for all institutions with custom 8-bit Canvas logos & dynamic library pass headers.
+- Interactive D-Pad: Mensa Budget Simulator (UP/DOWN) for Studierendenwerk meals & Dot-Matrix Palette Switcher (LEFT/RIGHT).
+- Max-Brightness Auto-Boost: Instant 100% screen brightness override for optical library barcode scanners.
+- Low-Balance & Expiry Alerts: 3-beep low health chime (< 5.00 €) and semester validation terminal reminders.
+- Offline CSV Export: Native Storage Access Framework export from History view with zero storage permissions.
+- 3x1 Android Home Screen Mini-Widget: Live balance and timestamp on your launcher.
+

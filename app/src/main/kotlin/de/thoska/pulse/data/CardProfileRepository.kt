@@ -3,6 +3,7 @@ package de.thoska.pulse.data
 import android.content.Context
 import android.content.SharedPreferences
 import de.thoska.pulse.model.CardProfile
+import de.thoska.pulse.model.ThuringiaUniversity
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -39,7 +40,8 @@ class CardProfileRepository(context: Context) {
                         holderName = obj.getString("holderName"),
                         matrikelNr = obj.getString("matrikelNr"),
                         libraryBarcode = obj.getString("libraryBarcode"),
-                        validUntil = obj.getString("validUntil")
+                        validUntil = obj.getString("validUntil"),
+                        universityId = obj.optString("universityId", ThuringiaUniversity.EAH_JENA.id)
                     )
                 )
             }
@@ -75,6 +77,7 @@ class CardProfileRepository(context: Context) {
                 put("matrikelNr", p.matrikelNr)
                 put("libraryBarcode", p.libraryBarcode)
                 put("validUntil", p.validUntil)
+                put("universityId", p.universityId)
             }
             arr.put(obj)
         }

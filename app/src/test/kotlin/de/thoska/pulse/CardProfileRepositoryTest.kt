@@ -3,6 +3,7 @@ package de.thoska.pulse
 import de.thoska.pulse.data.CardProfileRepository
 import de.thoska.pulse.model.CardProfile
 import de.thoska.pulse.model.ThoskaCardData
+import de.thoska.pulse.model.ThuringiaUniversity
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -26,7 +27,8 @@ class CardProfileRepositoryTest {
             holderName = "MAX MUSTERMANN",
             matrikelNr = "1234567",
             libraryBarcode = "987654321012",
-            validUntil = "01.10.26 - 31.03.27"
+            validUntil = "01.10.26 - 31.03.27",
+            universityId = ThuringiaUniversity.FSU_JENA.id
         )
 
         val cardData = ThoskaCardData(
@@ -41,6 +43,8 @@ class CardProfileRepositoryTest {
         assertEquals("40,40 €", cardData.formattedBalance)
         assertEquals("1,40 €", cardData.formattedLastTransaction)
         assertEquals("MAX MUSTERMANN", cardData.profile?.holderName)
+        assertEquals(ThuringiaUniversity.FSU_JENA, cardData.profile?.university)
+        assertEquals("FSU JENA", cardData.profile?.university?.shortName)
     }
 
     @Test
@@ -57,5 +61,18 @@ class CardProfileRepositoryTest {
         assertNull(guestCard.profile)
         assertEquals("12,50 €", guestCard.formattedBalance)
         assertEquals("2,80 €", guestCard.formattedLastTransaction)
+    }
+
+    @Test
+    fun `test default university fallback on CardProfile`() {
+        val profile = CardProfile(
+            cardUid = "04:11:22:33:44:55:66",
+            holderName = "JANE DOE",
+            matrikelNr = "7654321",
+            libraryBarcode = "123456789012",
+            validUntil = "31.03.27"
+        )
+        assertEquals(ThuringiaUniversity.EAH_JENA.id, profile.universityId)
+        assertEquals(ThuringiaUniversity.EAH_JENA, profile.university)
     }
 }
