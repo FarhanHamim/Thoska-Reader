@@ -9,4 +9,5 @@ Features:
 • Low Credit & Expiry Alerts: 3-beep low health chime when balance drops below 5.00 € and semester validation warning when your card is expiring.
 • Offline CSV Export: Export your transaction history securely via Android's Storage Access Framework without requiring storage permissions.
 • Home Screen Mini-Widget (3x1): Keep your latest balance and meal deduction visible right on your launcher.
+• Live Web Showcase & Simulator: https://thoska-website-nu.vercel.app/
 

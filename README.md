@@ -2,13 +2,16 @@
 ### The 1990s Handheld Console Edition for Thüringen University Smartcards
 
 [![Platform](https://img.shields.io/badge/Platform-Android%208.0%2B%20(API%2026--34)-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com)
-[![Version](https://img.shields.io/badge/Version-v1.1.0%20(Code%202)-F58220?style=for-the-badge&logo=googleplay&logoColor=white)](release/thoska-boy-v1.1.0.apk)
+[![GitHub Release](https://img.shields.io/badge/GitHub-Release%20v1.1.0-238636?style=for-the-badge&logo=github&logoColor=white)](https://github.com/FarhanHamim/Thoska-Reader/releases/tag/v1.1.0)
+[![Website](https://img.shields.io/badge/Web%20Showcase-thoska--website--nu.vercel.app-00E5FF?style=for-the-badge&logo=vercel&logoColor=white)](https://thoska-website-nu.vercel.app/)
 [![F-Droid Ready](https://img.shields.io/badge/F--Droid-Ready%20(No%20Antifeatures)-1976D2?style=for-the-badge&logo=fdroid&logoColor=white)](#-f-droid-packaging--submission-guide)
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.9.23-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org)
 [![Jetpack Compose](https://img.shields.io/badge/UI-Jetpack%20Compose%20M3-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
 [![NFC Tech](https://img.shields.io/badge/NFC-ISO--DEP%20(ISO%2014443--4)-E05A2B?style=for-the-badge&logo=nfc&logoColor=white)](https://en.wikipedia.org/wiki/ISO/IEC_14443)
 [![100% Offline](https://img.shields.io/badge/Privacy-100%25%20Offline%20(Zero%20Net)-0A280A?style=for-the-badge&logo=shield&logoColor=white)](#-security-privacy--offline-guarantee)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
+
+> 🌐 **Live Web Showcase & Interactive Simulator**: Explore the official promotional site at **[thoska-website-nu.vercel.app](https://thoska-website-nu.vercel.app/)** for live previews, interactive audio demonstrations, and campus device specifications.
 
 **THOSKA BOY** transforms everyday university Mensa card balance inquiries into a tactile, nostalgic 1990s handheld gaming experience. Built with **Kotlin** and **Jetpack Compose**, it communicates directly with physical **MIFARE DESFire EV1 (thoska)** smartcards using raw ISO 7816-4 APDUs over **ISO-DEP** (NFC Type A), rendering live student balances, meal history, and digital library passes on an authentic dot-matrix LCD screen with selectable retro palettes.
 
@@ -200,8 +203,9 @@ Categories:
   - Utility
 License: MIT
 AuthorName: Hamim
-SourceCode: https://github.com/username/thoska-reader
-IssueTracker: https://github.com/username/thoska-reader/issues
+WebSite: https://thoska-website-nu.vercel.app/
+SourceCode: https://github.com/FarhanHamim/Thoska-Reader
+IssueTracker: https://github.com/FarhanHamim/Thoska-Reader/issues
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
@@ -217,12 +221,16 @@ Builds:
 
 ---
 
-## 📥 Downloads
+## 📥 Downloads & Links
 
-| Version | Release Artifact | Target Android | Architecture |
-| :--- | :--- | :--- | :--- |
-| **v1.1.0** *(Latest)* | [**thoska-boy-v1.1.0.apk**](release/thoska-boy-v1.1.0.apk) | Android 8.0 - 14+ (API 26-34) | Universal (`arm64-v8a`, `armeabi-v7a`, `x86_64`) |
-| **Debug Build** | [**thoska-boy-debug.apk**](release/thoska-boy-debug.apk) | Android 8.0 - 14+ (API 26-34) | Universal |
+* 🌐 **Promotional Site & Web Simulator**: [**thoska-website-nu.vercel.app**](https://thoska-website-nu.vercel.app/)
+* 📦 **Official GitHub Release (v1.1.0)**: [**GitHub Releases — v1.1.0**](https://github.com/FarhanHamim/Thoska-Reader/releases/tag/v1.1.0)
+
+| Version | Release Artifact | Target Android | Architecture | Direct Download |
+| :--- | :--- | :--- | :--- | :--- |
+| **v1.1.0** *(GitHub Release)* | **thoska-boy-v1.1.0.apk** | Android 8.0 - 14+ (API 26-34) | Universal (`arm64-v8a`, `armeabi-v7a`, `x86_64`) | [**Download APK (v1.1.0)**](https://github.com/FarhanHamim/Thoska-Reader/releases/download/v1.1.0/thoska-boy-v1.1.0.apk) |
+| **Local Repository APK** | [**thoska-boy-v1.1.0.apk**](release/thoska-boy-v1.1.0.apk) | Android 8.0 - 14+ (API 26-34) | Universal | [**Download from Repo**](release/thoska-boy-v1.1.0.apk) |
+| **Debug Build** | [**thoska-boy-debug.apk**](release/thoska-boy-debug.apk) | Android 8.0 - 14+ (API 26-34) | Universal | [**Download Debug APK**](release/thoska-boy-debug.apk) |
 
 ---
 

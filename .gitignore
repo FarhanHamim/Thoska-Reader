@@ -11,5 +11,9 @@
 # Built outputs
 **/build/
 
+# Node / Web dependencies
+node_modules/
+.npm/
+
 # Keep release APKs
 !/release/*.apk

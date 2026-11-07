@@ -1,0 +1,62 @@
+name: Release APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Run Unit Tests
+        run: ./gradlew testDebugUnitTest --no-daemon
+
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            app/build/outputs/apk/debug/app-debug.apk
+            release/thoska-boy-v1.1.0.apk
+          name: THOSKA BOY v${{ github.ref_name }}
+          body: |
+            ### 🎮 THOSKA BOY (ThoskaPulse) v${{ github.ref_name }}
+            
+            **The 1990s Handheld Console Edition for Thüringen University Smartcards**
+            
+            🌐 **Live Promotional Site & Simulator**: [thoska-website-nu.vercel.app](https://thoska-website-nu.vercel.app/)
+            
+            #### What's New in v1.1.0:
+            - **10 Thuringian Universities**: Custom 8-bit vector Canvas emblems and dynamic headers for all institutions.
+            - **Neutral Idle Header**: "THOSKA SYSTEM" retro cartridge emblem on idle or unregistered cards.
+            - **Interactive D-Pad**:
+              - UP / DOWN: Mensa Budget Simulator with purchasing power calculations.
+              - LEFT / RIGHT: Dot-Matrix LCD Display Theme Switcher (DMG Olive, Pocket Silver, Backlit Cyan).
+            - **Max-Brightness Auto-Boost**: 100% brightness override with quiet-zone padding for optical library self-checkout scanners.
+            - **Low-Balance ("Low HP") & Expiry Alerts**: Rapid 3-beep low health chime (< 5.00 €) and semester validation terminal alerts.
+            - **Offline CSV Export**: Native Storage Access Framework export (`thoska_history.csv`) with zero storage permissions.
+            - **3x1 Home Screen Mini-Widget**: Live balance and timestamp on your launcher.
+            - **100% Offline & Privacy-First**: Zero internet permissions, zero analytics, zero trackers.
+          draft: false
+          prerelease: false
